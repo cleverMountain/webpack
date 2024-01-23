@@ -12,7 +12,9 @@ class CleanPlugin {
   }
   removeFilse(fs, filePath) {
     // 2.通过路径获取所有文件
+    if (!fs.existsSync(filePath)) return
     const files = fs.readdirSync(filePath)
+
     // 3.删除文件(删除文件夹前需要删除所有文件)
     files.forEach(file => {
       // 4.判断文件类型如果是文件直接删除

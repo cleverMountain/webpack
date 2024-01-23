@@ -1,6 +1,9 @@
 const { resolve } = require('path')
 const htmlWebpackPlugin = require('html-webpack-plugin')
 const CleanPlugin = require("./modules/plugin/clean-plugin")
+const miniCssExtractPlugin = require('mini-css-extract-plugin') // css分包
+const cssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin')
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 module.exports = {
   entry: resolve(__dirname, "./src/main.js"),
   output: {
@@ -20,7 +23,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: [miniCssExtractPlugin.loader, 'css-loader']
       },
       {
         test: /\.less$/,
@@ -44,11 +47,23 @@ module.exports = {
     ]
   },
   plugins: [
+    new miniCssExtractPlugin({
+      filename: 'css/[hash:8].css'
+    }), // css分包
+    new cssMinimizerWebpackPlugin(), // css压缩
     new CleanPlugin(),
     new htmlWebpackPlugin({
       template: resolve(__dirname, "./index.html")
     })
   ],
+  optimization: {
+    // js压缩
+    minimizer: [
+      new UglifyJsPlugin({
+        test: /\.js(\?.*)?$/i,
+      }),
+    ],
+  },
   mode: 'development',
   devServer: {
     port: 9090
