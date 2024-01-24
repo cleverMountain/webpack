@@ -4,6 +4,9 @@ const CleanPlugin = require("./modules/plugin/clean-plugin")
 const miniCssExtractPlugin = require('mini-css-extract-plugin') // css分包
 const cssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin')
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const os = require('os');
+const length = os.cpus().length // 获取核数
+
 module.exports = {
   entry: resolve(__dirname, "./src/main.js"),
   output: {
@@ -14,35 +17,46 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
-        use: [resolve(__dirname, "./modules/loader/clean-log")]
-      },
-      {
-        test: /\.vue$/,
-        use: [resolve(__dirname, "./modules/loader/vue-loader")]
-      },
-      {
-        test: /\.css$/,
-        use: [miniCssExtractPlugin.loader, 'css-loader']
-      },
-      {
-        test: /\.less$/,
-        use: ['style-loader', 'css-loader', 'less-loader']
-      },
-      {
-        test: /\.(jpg|png|gif)$/,
-        // 使用一个loader
-        // 下载url-loader file-loader
-        loader: 'url-loader',
-        options: {
-          limit: 0.0001 * 1024,
-          name: '[hash:8].[ext]'
-        }
-      },
-      {
-        test: /\.html$/,
-        // 处理Html中img图片（负责引入img，从而能被url-loader进行处理）
-        loader: 'html-loader'
+        oneOf: [
+          {
+            test: /\.js$/,
+            use: [
+              {
+                loader: 'thread-loader',
+                options: {
+                  threads: length
+                }
+              }
+            ]
+          },
+          {
+            test: /\.vue$/,
+            use: [resolve(__dirname, "./modules/loader/vue-loader")]
+          },
+          {
+            test: /\.css$/,
+            use: [miniCssExtractPlugin.loader, 'css-loader']
+          },
+          {
+            test: /\.less$/,
+            use: ['style-loader', 'css-loader', 'less-loader']
+          },
+          {
+            test: /\.(jpg|png|gif)$/,
+            // 使用一个loader
+            // 下载url-loader file-loader
+            loader: 'url-loader',
+            options: {
+              limit: 0.0001 * 1024,
+              name: '[hash:8].[ext]'
+            }
+          },
+          {
+            test: /\.html$/,
+            // 处理Html中img图片（负责引入img，从而能被url-loader进行处理）
+            loader: 'html-loader'
+          }
+        ]
       }
     ]
   },
@@ -63,9 +77,17 @@ module.exports = {
         test: /\.js(\?.*)?$/i,
       }),
     ],
+    // 开启treesheking
+    usedExports: true,
+    // 代码分割
+    splitChunks: {
+      chunks: 'all' // 哪些chunk需要优化 async 和 initial
+    }
   },
   mode: 'development',
+  devtool: 'cheap-module-source-map',
   devServer: {
-    port: 9090
+    port: 9090,
+    hot: true
   }
 }

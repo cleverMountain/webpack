@@ -31,65 +31,70 @@ module.exports.pitch = function() {}
 2. 缓存效率低，如果只修改了某个页面，要去重新打包。
 3. 分包策略: 对于多入口的项目可以根据entey分包，多入口分包
    异步分包(动态引入import)
-
-
-## treeshaking
-1. 对代码进行静态分析，去除不适用的代码
+4. 代码压缩(css代码压缩cssMinimizerWebpackPlugin，js代码压缩TerserWebpackPlugin webpack内置插件开发环境的默认配置)
 
 
 
+## treeshaking （构建体积）
+引入库的时候只用到了某些方法，打包某些方法
+1. 静态分析代码中的模块依赖关系，并删除未使用的代码
+2. 打开：在optimization优化项中usedExports设置为true，开发环境下默认打开
+```js
+   optimization: {
+      usedExports: true,
+   },
+```
+
+## sourceMap(源代码映射)
+1. 生成源文件的映射，一般在开发环境下使用
+2. 开发环境一般使用cheap-module-source-map只包含行映射
+3. 生产环境下使用source-map，包含行和列
+
+
+## HMR 热更新 (构建速度)HotModuleReplacement
+1. 开发环境下devServer的默认配置hot: true
+```js
+  devServer: {
+    port: 9090,
+    hot: 'false'
+  }
+```
+
+
+## oneOf
+1. onnOf，只让一个rule规则处理，webpack解析各个文件时，会去依次遍历每一个rule规则，当通过test匹配到后会去使用该规则的loade解析文件，但是解析完毕后，还会继续往后匹配rule规则，导致重复匹配，但是wepack的规则是一种rule解析一种相同的文件格式，当匹配到后就不要继续匹配了
+
+
+## exclude/include
+1. 处理js时不处理node_mpdules
+
+
+## 多进程打包(速度)
+1. 使用thread-loader
+```js
+// 使用的核数不能超过操作系统的核数
+const os = require('os');
+const length = os.cpus().length // 获取核数
+// 配置，一般打包js使用
+let rule =  {
+            test: /\.js$/,
+            use: [
+              {
+                loader: 'thread-loader',
+                options: {
+                  threads: length
+                }
+              }
+            ]
+          },
+```
+
+## 图片压缩
+
+
+## 多入口打包
+1. 件打包生成的文件分割成多个js文件
+2. 按需加载js文件 import动态导入
+import('./add').then(res)
 ## 提高webpack打包速度  分包策略 压缩代码(css与js) cdn静态资源  import按需加载
 
-为什么使用webpack
-
-webpack的常用配置项
-
-devtool项的值一般有哪些
-
-source-map的原理（重点）
-
-module，chunk和bundle的区别联系
-
-webpack的工作流程
-
-webpack热更新原理
-
-plugin和loader的区别
-
-如何优化webpakc 的打包速度
-
-如何减少webpack的打包体积
-
-splitechunk配置项细节
-
-常用loader，plugin
-
-hash，chunkhash，contenthash的区别
-
-tree shaking原理
-
-babel的原理和工作流
-
-loader的原理和代码实现
-
-plugin的原理和代码实现
-
-webpack中提取公共模块的方法
-
-mainfest文件的作用是什么
-
-less-loader的底层原理
-
-webpack5的新特性
-
-webpack做多页面打包的思路
-
-错误信息上报如何用webpack处理，监听webpack生命周期钩子函数，进行webpack打包过程中错误信息的收集
-
-webpack中做代理
-
-webpack长缓存优化
-
-动态导入、按需加载原理
-
-webpack文件监听的原理（轮询），开启方式
