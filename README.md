@@ -9,10 +9,25 @@ entry入口 output输出 module模块 plugins插件 mode模式 devServe开发服
 
 3. sourceMap原理
 - sourceMap用于生成源文件的映射
-
+将编译、打包、压缩后的代码映射回源代码的过程。打包压缩后的代码不具备良好的可读性，想要调试源码就需要 soucre map
+      开发环境：cheap-module-source-map  没有列映射(column mapping)的 source map，将 loader source map 简化为每行一个映射(mapping)。
+      生产环境：source-map
 
 4. webpack的工作流程
 - 从配置文件的entry出发，Webpack会构建一个依赖图，用于追踪所有模块之间的依赖关系，遇到特定文件格式时使用特定的loader解析文件，通过plugins，生成打包文件
+初始化参数：从配置文件和 Shell 语句中读取与合并参数，并初始化需要使用的插件和配置插件等执行环境所    
+               需要的参数
+    开始编译：通过合并后的参数得到compiler对象，并加载配置中导入的插件，执行compiler对象的run方法
+    确定入口：根据配置文件中的entry找到入口文件
+    编译模块：从入口文件触发，调用所有配置的Loader对模块进行处理，再找出该模块依赖的模块，再递归本步骤直到
+             所有入口依赖的文件都经过了本步骤的处理
+    完成模块编译：在经过第4步使用 Loader 翻译完所有模块后，得到了每个模块被翻译后的最终内容以及它们之间的依赖关系
+    输出资源：根据入口和模块之间的依赖关系，组装成一个个包含多个模块的 Chunk，再把每个 Chunk 转换成一个单独的文件
+             加入到输出列表，这步是可以修改输出内容的最后机会
+    输出完成：在确定好输出内容后，根据配置确定输出的路径和文件名，把文件内容写入到文件系统
+初始化：启动构建，读取与合并配置参数，加载 Plugin，实例化 Compiler对象并运行run方法
+编译：从Entry出发，针对每个Module串行调用对应的Loader去翻译文件的内容再找到该Module依赖的Module，递归地进行编译处理
+输出：将编译后的 Module 组合成 Chunk，将 Chunk 转换成文件，输出到文件系统中
 
 5. treeshaking原理
 - 静态分析代码中的模块依赖关系，并删除未使用的代码
@@ -26,6 +41,8 @@ entry入口 output输出 module模块 plugins插件 mode模式 devServe开发服
 
 
 6. webpack热更新原理(HMR)
+(HMR - hot module replacement)功能会在应用程序运行过程中，替换、添加或删除 模块，而无需重新加载整个页面，只刷新你变动的模块
+         核心就是服务端向客户端推送更新后的的chunk文件， WDS 与浏览器之间维护了一个 Websocket，当本地资源发生变化时(通过watch监听到)，WDS 会向浏览器推送更新，并带上构建时的 hash，让客户端与上一次资源进行对比客户端对比出差异后会向 WDS 发起 Ajax 请求来获取更改内容或者模块(文件列表、hash值)，后该模块再次通过 jsonp 请求，获取到最新的模块代码，之后HotModulePlugin 将会对新旧模块进行对比，决定是否更新模块，在决定更新模块后，检查模块之间的依赖关系，更新模块的同时更新模块间的依赖引用
 
 
 
@@ -67,6 +84,10 @@ module.exports = function (source) {
 
 11. webpack做多页面打包的思路
 - entry入口处定义对象即可，一个入口对应一项
+
+
+7.bundle体积监控和分析： webpack-bundle-analyzer 生成 bundle 的模块组成图，显示所占体积
+
 
 ### 插件
 1. 
