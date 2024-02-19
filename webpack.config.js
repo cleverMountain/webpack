@@ -4,6 +4,9 @@ const CleanPlugin = require("./modules/plugin/clean-plugin")
 const miniCssExtractPlugin = require('mini-css-extract-plugin') // css分包
 const cssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin')
 const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const os = require('os');
+const length = os.cpus().length // 获取核数
+
 module.exports = {
   entry: resolve(__dirname, "./src/main.js"),
   output: {
@@ -64,9 +67,17 @@ module.exports = {
         test: /\.js(\?.*)?$/i,
       }),
     ],
+    // 开启treesheking
+    usedExports: true,
+    // 代码分割
+    splitChunks: {
+      chunks: 'all' // 哪些chunk需要优化 async 和 initial
+    }
   },
   mode: 'development',
+  devtool: 'cheap-module-source-map',
   devServer: {
-    port: 9090
+    port: 9090,
+    hot: true
   }
 }
