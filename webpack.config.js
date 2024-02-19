@@ -13,13 +13,14 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.js$/,
-        use: [resolve(__dirname, "./modules/loader/clean-log")]
-      },
+
       {
         test: /\.vue$/,
         use: [resolve(__dirname, "./modules/loader/vue-loader")]
+      },
+      {
+        test: /\.xlsx$/,
+        use: [resolve(__dirname, "./modules/loader/xlxs")]
       },
       {
         test: /\.css$/,
